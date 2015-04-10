@@ -1,0 +1,139 @@
+double numCycle = 0;
+ double cycleTriple = 0;
+ double middle = 0;
+ double middleTriple = 0;
+ double numin = 0;
+ double numinTriple = 0;
+ double numout = 0;
+ double numOutTriple = 0;
+ Iterator<ArrayList<Key>> arcs;
+ Iterator<ArrayList<Key>> arcs2;
+ ArrayList<Key> arc = null;
+ ArrayList<Key> arc2 = null;
+ DLLDynamicSet jVertex;
+ DLLDynamicSet hVertex;
+ 
+Directed Clustering Cycle
+Runtime: O(V+E(maxOutDeg(V))) 	 Method loops through whole graph which is V+E, for every arc it will search in respective linked list maxOutDegree(V) times
+public double cycleClus() {
+	numCycle = 0;
+	cycleTriple = 0;
+ 	 for(DLLDynamicSet dynamicSet: graph.values()) {
+ 		DLLDynamicSet i = dynamicSet;
+ 		for(DLLDynamicSet.Node j = i.head(); j != null; j = j.next()) {
+ 			jVertex = graph.get(j.getKey());
+ 			for(DLLDynamicSet.Node h = jVertex.head(); h != null; h = h.next()) {
+ 				numCycle += 1;
+ 				if(graph.get(h.getKey()).retrieve(i.setDataStructure()) != null) cycleTriple += 1;
+ 			}
+ 		}
+ 	 }
+ 	 	
+ 	return (numCycle/cycleTriple);
+ }
+ 
+Directed Clustering Middle
+Runtime: O(V(V+E) + maxInDegree(V))) 	Method loops V times, inAdjVertices runs in (V+E) to find the vertices, loops for maxInDegree(V) times
+ public double middleClus() {
+ 	numin = 0;
+ 	 numinTriple = 0;
+ 	for(DLLDynamicSet dynamicSet: graph.values()) {
+ 		DLLDynamicSet i = dynamicSet;
+ 		arcs = inAdjacentVertices((Key) i.setDataStructure());
+ 		while(arcs.hasNext()) {
+ 			arc = arcs.next();
+ 			jVertex = graph.get(arc.get(0));
+ 			for(DLLDynamicSet.Node h = jVertex.head(); h != null; h = h.next()) {
+ 				middleTriple += 1;
+ 				if(i.retrieve((Key) h.getKey()) != null) middle += 1;
+ 			}
+ 		}
+ 	}
+ 	return (middle/middleTriple);
+ }
+ 
+
+Directed Clustering In
+Runtime: O(V(V+E) + maxInDegree(V)^2))	Method loops V times, inAdjVertices runs in (V+E) to find the vertices,similar to directed clustering middle 
+	method but extra for loop for maxInDegree(V)^2 times
+ public double inClus() {
+ 	numin = 0;
+ 	 numinTriple = 0;
+ 	for(DLLDynamicSet dynamicSet: graph.values()) {
+ 		DLLDynamicSet i = dynamicSet;
+ 		arcs = inAdjacentVertices((Key) i.setDataStructure());
+ 		arcs2 = inAdjacentVertices((Key) i.setDataStructure());
+ 		if(arcs2.hasNext()) {
+ 			arcs2.next();
+ 		}
+ 		while(arcs.hasNext()) {
+ 			arc = arcs.next();
+ 			jVertex = graph.get(arc.get(0));
+ 			for(DLLDynamicSet.Node h = jVertex.head(); h != null; h = h.next()) {
+ 				middleTriple += 1;
+ 				if(i.retrieve((Key) h.getKey()) != null) middle += 1;
+ 			}
+ 				
+ 			while(arcs2.hasNext()) {
+ 				arc2 = arcs2.next();
+ 				numinTriple += 1;
+ 				hVertex = graph.get(arc2.get(0));
+ 				if(jVertex.retrieve(hVertex.setDataStructure()) != null) numin += 1;
+ 				else if(hVertex.retrieve(jVertex.setDataStructure()) != null) numin += 1;
+ 			}
+ 		}
+ 	}
+ 	return (numin/numinTriple);
+ }
+ 
+Directed Clustering Out
+Similar to regular clustering coefficient but two checks for both direction to count numTriangle
+Clustering Coefficient:  O(V(maxOutDeg(V)^2))
+	In every linked list there is two for loops for the nodes which runs in maxOutDeg(V)^2. For every pair of two nodes then  there will be another 
+	search in a source linked list for the destination key which would run maxOutDeg(V) time. This would be similar to n^2 + n time to the smaller 
+	one is dropped in the runtime. There are V number of linked list so the method runs maxOutDeg(V)^2 V times. Constant time to check and compute.
+ public double outClustering() {
+ 	numTriangles = 0;
+ 	 numTriples = 0;
+ 	for(DLLDynamicSet dynamicSet: graph.values()) {
+ 		DLLDynamicSet vertex = dynamicSet;
+ 		for(DLLDynamicSet.Node current = vertex.head(); current != null; current = current.next()) {
+ 			for(DLLDynamicSet.Node friendo = current.next(); friendo != null; friendo = friendo.next()) {
+ 				numTriples += 1;
+ 				if(graph.get((Key) current.getKey()).retrieve((Key)friendo.getKey()) != null) numTriangles += 1;
+ 				else if(graph.get((Key) friendo.getKey()).retrieve((Key)current.getKey()) != null) numTriangles += 1;
+ 			}
+ 		}
+ 	}
+ 	return((numTriangles)/numTriples);
+ }
+
+Testing
+Graph Results
+
+celegansneural.vna
+	Directed Clustering Coefficient Cycle: 19.023202
+	Directed Clustering Coefficient Middle: 0.136264
+	Directed Clustering Coefficient In: 0.230843
+	Directed Clustering Coefficient Out: 0.259937
+
+political-blogs
+	Directed Clustering Coefficient Cycle: 9.655261
+	Directed Clustering Coefficient Middle: 0.193499
+	Directed Clustering Coefficient In: 0.179540
+	Directed Clustering Coefficient Out: 0.309575
+
+wiki-Vote.vna
+
+g-297-2345.vna
+	Clustering Coefficient: 0.025458
+	Directed Clustering Coefficient Cycle: 40.754967
+	Directed Clustering Coefficient Middle: 0.023270
+	Directed Clustering Coefficient In: 0.063965
+	Directed Clustering Coefficient Out: 0.051456
+
+g-1490-19025.vna
+	Directed Clustering Coefficient Cycle: 120.210188
+	Directed Clustering Coefficient Middle: 0.007846
+	Directed Clustering Coefficient In: 0.015968
+	Directed Clustering Coefficient Out: 0.016856
